@@ -1,9 +1,9 @@
 # QESM Kafka Broker Batching Simulation
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/shumkar-barpiev/QESM_kafka_broker/blob/main/draw_plots.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/shumkar-barpiev/kafka-message-broker-qesm/blob/main/draw_plots.ipynb)
 
 This Maven project uses the ORIS Sirio library to simulate a Stochastic Time
-Petri Net (STPN) model of Kafka-style message batching. The model studies the
+Petri Net (STPN) model of Kafka message batching. The model studies the
 trade-off between batch size, timeout, push overhead, gateway backlog, service
 backlog, batching-induced idle time, and service-rate stability.
 
@@ -228,28 +228,3 @@ Click the **Open in Colab** badge near the top of this README, or use this link:
    ```
 
 5. Press Enter and select `draw_plots.ipynb` from the result.
-
-Use the complete URL. A partial path such as
-`kafka-message-broker-qesm/blob/main/draw_plots.ipynb` may not return a result.
-
-### Prepare the project files in Colab
-
-Colab opens the notebook without cloning the complete Maven project. Before
-running the notebook's plotting cells, add and run a temporary setup cell:
-
-```python
-!git clone https://github.com/shumkar-barpiev/QESM_kafka_broker.git
-%cd QESM_kafka_broker
-```
-
-Confirm that the generated CSV files are available:
-
-```python
-!ls outcomes
-```
-
-If the CSV files are not stored in the repository, first run the Java
-experiments locally and upload the resulting files to
-`/content/QESM_kafka_broker/outcomes/` using Colab's Files panel. Then run the
-remaining notebook cells in order. Colab already provides pandas and
-matplotlib, so no additional Python package installation is normally required.
