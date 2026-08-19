@@ -188,3 +188,53 @@ outcomes/
 
 Running `TransientSimulation` directly creates a filename containing the reward
 type and supplied model parameters.
+
+## Draw the outcome plots
+
+The root-level `draw_plots.ipynb` notebook reads the six configured CSV files
+from `outcomes` and plots:
+
+- baseline queue behaviour;
+- the BatchSize effect on gateway and service backlog;
+- the Timeout effect on gateway and service backlog; and
+- cumulative batching-induced idle behaviour.
+
+The plots are displayed in the notebook and saved as PNG files under
+`outcomes/plots`. Existing PNG files with the same names are replaced.
+
+### Run locally with Jupyter
+
+Install the Python dependencies and start the notebook from the project root:
+
+```bash
+python3 -m pip install jupyter pandas matplotlib
+jupyter notebook draw_plots.ipynb
+```
+
+Run all cells in order. The outcome CSV files must already exist; generate them
+with `App` before opening the notebook if necessary.
+
+### Run in Google Colab
+
+Open the notebook directly from GitHub using
+[Google Colab](https://colab.research.google.com/github/shumkar-barpiev/QESM_kafka_broker/blob/main/draw_plots.ipynb).
+
+Colab opens the notebook without cloning the complete Maven project. Before
+running the notebook's Python cells, add and run a temporary setup cell:
+
+```python
+!git clone https://github.com/shumkar-barpiev/QESM_kafka_broker.git
+%cd QESM_kafka_broker
+```
+
+Confirm that the generated CSV files are available:
+
+```python
+!ls outcomes
+```
+
+If the CSV files are not stored in the repository, first run the Java
+experiments locally and upload the resulting files to
+`/content/QESM_kafka_broker/outcomes/` using Colab's Files panel. Then run the
+remaining notebook cells in order. Colab already provides pandas and
+matplotlib, so no additional Python package installation is normally required.
