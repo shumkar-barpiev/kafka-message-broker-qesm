@@ -1,7 +1,15 @@
 package com.myexam.app.qesm.analysis;
 
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.math.BigDecimal;
 import java.math.MathContext;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.Collection;
 
 import com.myexam.app.qesm.model.KafkaBrokerModel;
@@ -228,7 +236,16 @@ public final class TransientSimulation {
 		System.out.println("# ArrivalRate=" + ARRIVAL_RATE + ", BatchSize=" + batchSize + ", Timeout=" + timeout
 				+ ", Overhead=" + overhead + ", Stability=" + stability + ", Step=" + step + ", Horizon=" + horizon
 				+ ", Runs=" + runs + ", RewardType=" + rewardType);
-		result.printCsv();
+		Path outputFile = Paths.get("outcomes", defaultFileName(batchSize, timeout, overhead, stability, rewardType));
+		result.writeCsv(outputFile);
+		System.out.println("# Saved=" + outputFile.toAbsolutePath());
+	}
+
+	private static String defaultFileName(int batchSize, BigDecimal timeout, int overhead, int stability,
+			RewardType rewardType) {
+		return rewardType.name().toLowerCase() + "_batch_size_" + batchSize + "_timeout_"
+				+ timeout.toPlainString().replace('.', '_') + "_overhead_" + overhead + "_stability_" + stability
+				+ ".csv";
 	}
 
 	/** Reward values at each configured time sample. */
@@ -303,6 +320,67 @@ public final class TransientSimulation {
 				printNormalTransientCsv();
 			} else {
 				printCumulativeWatcherCsv();
+			}
+		}
+
+		/**
+		 * Creates parent directories and replaces an existing CSV with fresh results.
+		 */
+		public void writeCsv(Path outputFile) {
+			if (outputFile == null) {
+				throw new IllegalArgumentException("outputFile must not be null");
+			}
+
+			try {
+				Path parent = outputFile.toAbsolutePath().getParent();
+				if (parent != null) {
+					Files.createDirectories(parent);
+				}
+
+				try (BufferedWriter writer = Files.newBufferedWriter(outputFile, StandardCharsets.UTF_8,
+						StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE)) {
+					if (rewardType == RewardType.NORMAL_TRANSIENT) {
+						writeNormalTransientCsv(writer);
+					} else {
+						writeCumulativeWatcherCsv(writer);
+					}
+				}
+			} catch (IOException exception) {
+				throw new UncheckedIOException("Unable to write outcomes to " + outputFile, exception);
+			}
+		}
+
+		private void writeNormalTransientCsv(BufferedWriter writer) throws IOException {
+			writer.write("time,meanMsgsAtGateway,meanAtService");
+			writer.newLine();
+			BigDecimal time = BigDecimal.ZERO;
+			for (int sample = 0; sample < gatewayMean.length; sample++) {
+				writer.write(time.toPlainString());
+				writer.write(",");
+				writer.write(gatewayMean[sample].toPlainString());
+				writer.write(",");
+				writer.write(serviceMean[sample].toPlainString());
+				writer.newLine();
+				time = time.add(timeStep);
+			}
+		}
+
+		private void writeCumulativeWatcherCsv(BufferedWriter writer) throws IOException {
+			writer.write("time,cumulativeEmpty,cumulativeBatchingIdleReward,batchingIdleTime,batchingIdleFraction");
+			writer.newLine();
+			BigDecimal time = BigDecimal.ZERO;
+			for (int sample = 0; sample < cumulativeEmpty.length; sample++) {
+				writer.write(time.toPlainString());
+				writer.write(",");
+				writer.write(cumulativeEmpty[sample].toPlainString());
+				writer.write(",");
+				writer.write(cumulativeBatchingIdleReward[sample].toPlainString());
+				writer.write(",");
+				writer.write(batchingIdleTime[sample].toPlainString());
+				writer.write(",");
+				writer.write(batchingIdleFraction[sample].toPlainString());
+				writer.newLine();
+				time = time.add(timeStep);
 			}
 		}
 
