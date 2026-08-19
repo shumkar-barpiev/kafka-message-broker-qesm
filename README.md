@@ -1,5 +1,7 @@
 # QESM Kafka Broker Batching Simulation
 
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/shumkar-barpiev/QESM_kafka_broker/blob/main/draw_plots.ipynb)
+
 This Maven project uses the ORIS Sirio library to simulate a Stochastic Time
 Petri Net (STPN) model of Kafka-style message batching. The model studies the
 trade-off between batch size, timeout, push overhead, gateway backlog, service
@@ -20,7 +22,7 @@ Every push adds the configured `Overhead` to the service workload. Service time
 is exponential, with rate:
 
 ```text
-arrivalRate * (1 + Stability / 100)
+1 + Stability / 100
 ```
 
 The main experiments keep `arrivalRate` fixed at `1`.
@@ -80,14 +82,14 @@ mvn org.codehaus.mojo:exec-maven-plugin:3.5.0:java \
 
 `App` runs these experiments:
 
-| Experiment | BatchSize | Timeout | Overhead | Stability | Reward type |
-|---|---:|---:|---:|---:|---|
-| Baseline queue behaviour | 20 | 25 | 2 | 30 | `NORMAL_TRANSIENT` |
-| BatchSize backlog | 10 | 25 | 2 | 30 | `NORMAL_TRANSIENT` |
-| BatchSize backlog | 30 | 25 | 2 | 30 | `NORMAL_TRANSIENT` |
-| Timeout backlog | 20 | 12.5 | 2 | 30 | `NORMAL_TRANSIENT` |
-| Timeout backlog | 20 | 35 | 2 | 30 | `NORMAL_TRANSIENT` |
-| Batching-induced idle | 20 | 25 | 2 | 30 | `CUMULATIVE_WATCHER` |
+| Experiment               | BatchSize | Timeout | Overhead | Stability | Reward type          |
+| ------------------------ | --------: | ------: | -------: | --------: | -------------------- |
+| Baseline queue behaviour |        20 |      25 |        2 |        30 | `NORMAL_TRANSIENT`   |
+| BatchSize backlog        |        10 |      25 |        2 |        30 | `NORMAL_TRANSIENT`   |
+| BatchSize backlog        |        30 |      25 |        2 |        30 | `NORMAL_TRANSIENT`   |
+| Timeout backlog          |        20 |    12.5 |        2 |        30 | `NORMAL_TRANSIENT`   |
+| Timeout backlog          |        20 |      35 |        2 |        30 | `NORMAL_TRANSIENT`   |
+| Batching-induced idle    |        20 |      25 |        2 |        30 | `CUMULATIVE_WATCHER` |
 
 The configured sampling step is `0.1`, the time horizon is `250`, and the run
 count is `1`. A single run is intended for model and trajectory validation;
@@ -110,16 +112,16 @@ The arguments are positional:
 BatchSize Timeout Overhead Stability [Step] [Horizon] [Runs] [RewardType]
 ```
 
-| Argument | Meaning | Example |
-|---|---|---:|
-| `BatchSize` | Number of gateway messages that triggers an immediate push | `20` |
-| `Timeout` | Maximum batching delay | `25` |
-| `Overhead` | Fixed service work added by each push | `2` |
-| `Stability` | Percentage service-rate margin | `30` |
-| `Step` | Transient sampling step | `0.1` or `0.01` |
-| `Horizon` | Simulation time horizon | `250` or `500` |
-| `Runs` | Number of stochastic replications | `1` or a larger value |
-| `RewardType` | Reward calculation to perform | `NORMAL_TRANSIENT` or `CUMULATIVE_WATCHER` |
+| Argument     | Meaning                                                    |                                    Example |
+| ------------ | ---------------------------------------------------------- | -----------------------------------------: |
+| `BatchSize`  | Number of gateway messages that triggers an immediate push |                                       `20` |
+| `Timeout`    | Maximum batching delay                                     |                                       `25` |
+| `Overhead`   | Fixed service work added by each push                      |                                        `2` |
+| `Stability`  | Percentage service-rate margin                             |                                       `30` |
+| `Step`       | Transient sampling step                                    |                            `0.1` or `0.01` |
+| `Horizon`    | Simulation time horizon                                    |                             `250` or `500` |
+| `Runs`       | Number of stochastic replications                          |                      `1` or a larger value |
+| `RewardType` | Reward calculation to perform                              | `NORMAL_TRANSIENT` or `CUMULATIVE_WATCHER` |
 
 When the optional arguments are omitted, the defaults are step `0.1`, horizon
 `250`, one run, and `NORMAL_TRANSIENT`.
@@ -199,28 +201,41 @@ from `outcomes` and plots:
 - the Timeout effect on gateway and service backlog; and
 - cumulative batching-induced idle behaviour.
 
-The plots are displayed in the notebook and saved as PNG files under
-`outcomes/plots`. Existing PNG files with the same names are replaced.
+The plots are displayed inline in the notebook only.
 
-### Run locally with Jupyter
+## Open the plots in Google Colab
 
-Install the Python dependencies and start the notebook from the project root:
+The file
+[`draw_plots.ipynb`](https://github.com/shumkar-barpiev/QESM_kafka_broker/blob/main/draw_plots.ipynb)
+reads the six configured CSV files from the `outcomes/` folder and creates the
+baseline, BatchSize, Timeout, and cumulative batching-induced idle plots.
 
-```bash
-python3 -m pip install jupyter pandas matplotlib
-jupyter notebook draw_plots.ipynb
-```
+### Open directly
 
-Run all cells in order. The outcome CSV files must already exist; generate them
-with `App` before opening the notebook if necessary.
+Click the **Open in Colab** badge near the top of this README, or use this link:
 
-### Run in Google Colab
+[Open `draw_plots.ipynb` in Google Colab](https://colab.research.google.com/github/shumkar-barpiev/QESM_kafka_broker/blob/main/draw_plots.ipynb)
 
-Open the notebook directly from GitHub using
-[Google Colab](https://colab.research.google.com/github/shumkar-barpiev/QESM_kafka_broker/blob/main/draw_plots.ipynb).
+### Open manually from Colab
+
+1. Open [Google Colab](https://colab.research.google.com/).
+2. Select **File → Open notebook**.
+3. Select the **GitHub** tab.
+4. Paste this complete GitHub URL into the search field:
+
+   ```text
+    https://github.com/shumkar-barpiev/kafka-message-broker-qesm/blob/main/draw_plots.ipynb
+   ```
+
+5. Press Enter and select `draw_plots.ipynb` from the result.
+
+Use the complete URL. A partial path such as
+`kafka-message-broker-qesm/blob/main/draw_plots.ipynb` may not return a result.
+
+### Prepare the project files in Colab
 
 Colab opens the notebook without cloning the complete Maven project. Before
-running the notebook's Python cells, add and run a temporary setup cell:
+running the notebook's plotting cells, add and run a temporary setup cell:
 
 ```python
 !git clone https://github.com/shumkar-barpiev/QESM_kafka_broker.git
